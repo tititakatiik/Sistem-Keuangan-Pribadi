@@ -1240,10 +1240,27 @@ function refreshAll() {
 // ===================== EVENT LISTENERS =====================
 
 function initEventListeners() {
-  // Sidebar navigation
-  els.navItems.forEach((item) => item.addEventListener("click", () => switchView(item.dataset.view)));
+  // Sidebar navigation — also close drawer on mobile after selecting a view
+  els.navItems.forEach((item) => item.addEventListener("click", () => {
+    switchView(item.dataset.view);
+    if (window.innerWidth <= 960) closeSidebar();
+  }));
   els.sidebarToggle.addEventListener("click", openSidebar);
   els.sidebarBackdrop.addEventListener("click", closeSidebar);
+
+  // Swipe-left on sidebar to close (mobile gesture)
+  (function() {
+    let _startX = 0, _startY = 0;
+    els.sidebar.addEventListener("touchstart", (e) => {
+      _startX = e.touches[0].clientX;
+      _startY = e.touches[0].clientY;
+    }, { passive: true });
+    els.sidebar.addEventListener("touchend", (e) => {
+      const dx = e.changedTouches[0].clientX - _startX;
+      const dy = Math.abs(e.changedTouches[0].clientY - _startY);
+      if (dx < -50 && dy < 60) closeSidebar();
+    }, { passive: true });
+  })();
   els.addTransactionTopBtn.addEventListener("click", () => switchView("transactions"));
 
   // Transaction form
@@ -1340,9 +1357,25 @@ function initEventListeners() {
   els.darkModeToggle.addEventListener("click", toggleDarkMode);
   els.darkModeToggleMobile.addEventListener("click", toggleDarkMode);
 
-  // Resize -> redraw gauge agar tetap proporsional jika dashboard sedang aktif
+  // Resize / orientation change → redraw gauge and charts to stay proportional
+  let _resizeTimer;
   window.addEventListener("resize", () => {
-    if (!document.getElementById("view-dashboard").hidden) renderHealthMeter();
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+      if (!document.getElementById("view-dashboard").hidden) {
+        renderHealthMeter();
+        renderCharts();
+      }
+    }, 150);
+  });
+  // Also handle orientation change explicitly
+  window.addEventListener("orientationchange", () => {
+    setTimeout(() => {
+      if (!document.getElementById("view-dashboard").hidden) {
+        renderHealthMeter();
+        renderCharts();
+      }
+    }, 350);
   });
 }
 
