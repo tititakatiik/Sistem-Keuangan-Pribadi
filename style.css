@@ -1516,47 +1516,333 @@ h1, h2, h3, h4 {
 }
 
 /* ─── RESPONSIVE ─────────────────────────────────────────────────── */
+
+/* 1100px — Tablet landscape: tighten grid cols */
 @media (max-width: 1100px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .form-grid  { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* 960px — Tablet portrait: activate off-canvas sidebar */
 @media (max-width: 960px) {
-  :root { --sidebar-w: 260px; }
-  .charts-grid { grid-template-columns: 1fr; }
-  .categories-grid { grid-template-columns: 1fr; }
-  .overview-grid { grid-template-columns: 1fr; }
+  :root { --sidebar-w: 280px; }
 
+  /* ── Off-canvas drawer ── */
   .sidebar {
     position: fixed;
     top: 0; left: 0;
-    height: 100vh;
+    height: 100dvh;
     transform: translateX(-100%);
     box-shadow: var(--shadow-lg);
+    z-index: 30;
+    transition: transform var(--t-slow) var(--spring);
   }
   .sidebar.is-open { transform: translateX(0); }
+
+  /* ── Topbar visible ── */
   .mobile-topbar { display: flex; }
-  .main-content  { padding: 20px 18px 56px; }
+
+  /* ── Main content below topbar ── */
+  .main-content { padding: 20px 18px 64px; }
+
+  /* ── Single-column grids ── */
+  .charts-grid         { grid-template-columns: 1fr; }
+  .categories-grid     { grid-template-columns: 1fr; }
+  .overview-grid       { grid-template-columns: 1fr; }
+  .charts-grid--triple { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 640px) {
-  .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-  .stat-card  { padding: 18px 16px 16px; }
-  .stat-card__value { font-size: 19px; }
-  .form-grid  { grid-template-columns: 1fr; }
-  .form-grid--2col { grid-template-columns: 1fr; }
-  .toolbar    { flex-direction: column; align-items: stretch; }
-  .toolbar .btn { width: 100%; }
-  .transaction-item { flex-wrap: wrap; }
-  .transaction-item__actions { margin-left: auto; }
-  .view-header { flex-direction: column; align-items: stretch; }
-  .view-header .btn { width: 100%; }
-  .goals-grid { grid-template-columns: 1fr; }
-  .goals-grid--compact { grid-template-columns: 1fr; }
-  .charts-grid--triple { grid-template-columns: 1fr; }
-  .dashboard-section-head { flex-direction: column; align-items: stretch; }
-  .dashboard-section-head .btn { width: 100%; }
-  .card { padding: 18px 18px; }
-  .modal { padding: 22px 20px 18px; }
+/* 768px — Mobile large: further collapse */
+@media (max-width: 768px) {
+  :root { --sidebar-w: 280px; }
+
+  html, body { font-size: 14px; }
+
+  .main-content { padding: 16px 14px 80px; }
+  .view         { gap: 16px; }
+
+  /* ── Topbar compact ── */
+  .mobile-topbar { padding: 11px 14px; }
+  .mobile-topbar__title { font-size: 14px; }
+  .icon-btn { width: 40px; height: 40px; min-height: 44px; min-width: 44px; }
+
+  /* ── View header ── */
+  .view-header { flex-direction: column; align-items: stretch; gap: 10px; }
+  .view-header h1 { font-size: 22px; }
+  .view-header__subtitle { font-size: 12px; }
+  .view-header .btn { width: 100%; min-height: 44px; height: 44px; }
+
+  /* ── Stat cards 2-col ── */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-card { padding: 16px 14px 14px; }
+  .stat-card__label { font-size: 10px; }
+  .stat-card__value { font-size: 17px; }
+  .stat-card__icon { width: 28px; height: 28px; font-size: 12px; top: 14px; right: 14px; }
+
+  /* ── Generic cards ── */
+  .card { padding: 16px 16px; border-radius: var(--radius-lg); }
+  .card__title { font-size: 11px; margin-bottom: 12px; }
+  .form-card { padding: 16px 16px; }
+  .toolbar-card { padding: 14px 16px; }
+  .list-card { padding: 16px 16px; }
+  .chart-card { padding: 16px 18px; }
+
+  /* ── Toolbar: stacked cols, wrap 2-up where possible ── */
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: end;
+  }
+  .toolbar .field { min-width: 0; }
+  .toolbar .field--grow { grid-column: 1 / -1; }
+  .toolbar .btn {
+    grid-column: span 1;
+    width: 100%;
+    min-height: 44px;
+    height: 44px;
+  }
+  #resetFilterBtn,
+  #exportBtn { grid-column: span 1; }
+
+  /* ── Form grid single col ── */
+  .form-grid      { grid-template-columns: 1fr; gap: 12px; }
+  .form-grid--2col { grid-template-columns: 1fr; gap: 12px; }
+
+  /* ── Fields touch-friendly ── */
+  .field { gap: 6px; min-width: 0; }
+  .field label { font-size: 10px; }
+  .field input,
+  .field select {
+    height: 44px;
+    padding: 0 14px;
+    font-size: 14px;
+    border-radius: var(--radius-lg);
+  }
+
+  /* ── Buttons touch-friendly ── */
+  .btn { height: 44px; min-height: 44px; padding: 0 18px; font-size: 12.5px; }
+  .btn--sm { height: 40px; min-height: 40px; padding: 0 14px; font-size: 11.5px; }
+
+  /* ── Type tabs ── */
+  .type-tabs { gap: 6px; margin-bottom: 16px; }
+  .type-tab { padding: 10px 12px; font-size: 12.5px; }
+
+  /* ── Overview grid — single col ── */
+  .overview-grid { grid-template-columns: 1fr; gap: 12px; }
+
+  /* ── Financial health: more compact gauge ── */
+  .health-card-compact { gap: 10px; }
+  .gauge-wrap { max-width: 180px; }
+  .gauge-readout span:first-child { font-size: 28px; }
+  .gauge-readout__label { font-size: 9px; }
+  .gauge-legend { font-size: 9px; gap: 4px 8px; }
+  .breakdown-mini { gap: 8px; }
+  .breakdown-mini-row__head { font-size: 10px; }
+
+  /* ── Analysis cards compact ── */
+  .biggest-category { padding: 12px 14px; }
+  .biggest-category__amount { font-size: 18px; }
+  .expense-ratio { padding: 10px 14px; }
+  .expense-ratio__value { font-size: 22px; }
+
+  /* ── Chart containers responsive ── */
+  .charts-grid--triple { grid-template-columns: 1fr; gap: 12px; }
+  .chart-wrap     { height: 200px; }
+  .chart-wrap--pie { height: 230px; }
+
+  /* ── Goal tracker ── */
+  .goals-grid         { grid-template-columns: 1fr; gap: 12px; }
+  .goals-grid--compact { grid-template-columns: 1fr; gap: 12px; }
+  .goal-card { padding: 16px 18px; gap: 10px; border-radius: var(--radius-lg); }
+  .goal-card__title { font-size: 14px; }
+  .goal-card__percent { font-size: 26px; }
+  .goal-card__actions button { width: 36px; height: 36px; min-height: 36px; }
+  .dashboard-section-head { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .dashboard-section-head .btn { width: auto; }
+
+  /* ── Transaction list ── */
+  .transaction-item { padding: 12px 14px; gap: 11px; }
+  .transaction-item__badge { width: 36px; height: 36px; font-size: 14px; }
+  .transaction-item__title { font-size: 13px; }
+  .transaction-item__meta { font-size: 11px; }
+  .transaction-item__amount { font-size: 13.5px; }
+  .transaction-item__actions button { width: 36px; height: 36px; min-height: 36px; }
+
+  /* ── Categories ── */
+  .categories-grid { grid-template-columns: 1fr; gap: 12px; }
+  .category-chip { padding: 8px 8px 8px 14px; font-size: 12px; }
+
+  /* ── Modal ── */
+  .modal-overlay { padding: 12px; align-items: flex-end; }
+  .modal {
+    padding: 20px 18px 16px;
+    border-radius: var(--radius-xl) var(--radius-xl) var(--radius-md) var(--radius-md);
+    max-width: 100%;
+    max-height: 90dvh;
+    overflow-y: auto;
+  }
+  .modal--sm { max-width: 100%; }
+  .modal__actions { flex-direction: column-reverse; gap: 8px; }
+  .modal__actions .btn { width: 100%; min-height: 44px; height: 44px; }
+
+  /* ── Toast above bottom safe area ── */
+  .toast { bottom: 76px; font-size: 12.5px; padding: 10px 20px; }
+
+  /* ── Empty state compact ── */
+  .empty-state { padding: 36px 16px; }
+  .empty-state__icon { font-size: 30px; }
+
+  /* ── Section title ── */
+  .secondary-section-title { font-size: 10px; }
+
+  /* ── Reduce heavy blur on mobile for performance ── */
+  .glass {
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  }
+  .mobile-topbar {
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  }
+  .sidebar {
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  }
+
+  /* ── Reduce animated orbs on mobile ── */
   .bg-orb--glass { display: none; }
+  .bg-orb--stone { display: none; }
+  .bg-orb--cream { filter: blur(38px); }
+  .bg-orb--orange { filter: blur(36px); }
+  .bg-orb--sand   { filter: blur(44px); }
+
+  /* ── Disable hover lift animations on touch devices ── */
+  .card:hover    { transform: none; box-shadow: var(--shadow-glass); }
+  .stat-card:hover { transform: none; box-shadow: var(--shadow-float); }
+  .goal-card:hover { transform: none; box-shadow: var(--shadow-float); }
+  .btn:hover     { transform: none; filter: none; }
+  .nav-item:hover { transform: none; }
+}
+
+/* 480px — Small phones: tighten further, single-col everything */
+@media (max-width: 480px) {
+  :root { --sidebar-w: 85vw; }
+
+  html, body { font-size: 13.5px; }
+
+  .main-content { padding: 12px 12px 80px; }
+
+  /* ── Stat cards: keep 2-col but tighter ── */
+  .stats-grid { gap: 8px; }
+  .stat-card { padding: 14px 12px 12px; }
+  .stat-card__value { font-size: 15px; }
+  .stat-card__label { font-size: 9px; letter-spacing: .04em; }
+  .stat-card__icon { display: none; }
+
+  /* ── Toolbar: fully stacked ── */
+  .toolbar { grid-template-columns: 1fr; gap: 8px; }
+  .toolbar .btn { grid-column: 1; }
+  #resetFilterBtn, #exportBtn { grid-column: 1; }
+
+  /* ── Cards tighter ── */
+  .card { padding: 14px 14px; }
+  .toolbar-card { padding: 12px 14px; }
+  .list-card { padding: 14px 14px; }
+
+  /* ── Financial health gauge smaller ── */
+  .gauge-wrap { max-width: 150px; }
+  .gauge-readout span:first-child { font-size: 24px; }
+
+  /* ── Chart heights smaller ── */
+  .chart-wrap      { height: 180px; }
+  .chart-wrap--pie { height: 200px; }
+
+  /* ── Transaction item: tighter, amount on new row when needed ── */
+  .transaction-item { padding: 10px 12px; gap: 9px; }
+  .transaction-item__badge { width: 32px; height: 32px; font-size: 13px; border-radius: var(--radius-sm); }
+  .transaction-item__title { font-size: 12.5px; }
+  .transaction-item__amount { font-size: 12.5px; }
+  .transaction-item__actions button { width: 34px; height: 34px; }
+
+  /* ── Goal card compact ── */
+  .goal-card { padding: 14px 14px; }
+  .goal-card__percent { font-size: 22px; }
+  .goal-card__title { font-size: 13px; }
+
+  /* ── Section title ── */
+  .secondary-section-title { margin: 0 0 -4px; }
+
+  /* ── Modal full-screen on tiny screens ── */
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: 18px 16px 24px;
+    max-height: 95dvh;
+  }
+
+  /* ── View header ── */
+  .view-header h1 { font-size: 20px; }
+
+  /* ── Category chips: full-width on small ── */
+  .category-chip-list { gap: 6px; }
+  .category-chip { font-size: 11.5px; }
+}
+
+/* 320px — Very small phones: absolute minimum */
+@media (max-width: 360px) {
+  html, body { font-size: 13px; }
+  .main-content { padding: 10px 10px 80px; }
+  .view { gap: 12px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .stat-card { padding: 12px 10px 10px; }
+  .stat-card__value { font-size: 13.5px; letter-spacing: -0.03em; }
+  .card { padding: 12px 12px; }
+  .field input, .field select { height: 42px; padding: 0 12px; font-size: 13px; }
+  .btn { height: 42px; min-height: 42px; padding: 0 14px; font-size: 12px; }
+  .mobile-topbar { padding: 10px 12px; }
+  .icon-btn { width: 36px; height: 36px; min-height: 44px; min-width: 44px; }
+  .view-header h1 { font-size: 18px; }
+  .transaction-item { gap: 8px; padding: 9px 10px; }
+  .transaction-item__badge { width: 30px; height: 30px; font-size: 12px; }
+  .gauge-wrap { max-width: 130px; }
+  .goal-card { padding: 12px 12px; }
+  .modal { padding: 16px 14px 20px; }
+}
+
+/* ── Safe-area insets (notch / home bar support) ── */
+@supports (padding: max(0px)) {
+  @media (max-width: 768px) {
+    .mobile-topbar {
+      padding-top: max(11px, env(safe-area-inset-top));
+      padding-left: max(14px, env(safe-area-inset-left));
+      padding-right: max(14px, env(safe-area-inset-right));
+    }
+    .main-content {
+      padding-bottom: max(80px, calc(64px + env(safe-area-inset-bottom)));
+    }
+    .toast {
+      bottom: max(76px, calc(60px + env(safe-area-inset-bottom)));
+    }
+    .sidebar {
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+    }
+  }
+  @media (max-width: 480px) {
+    .modal {
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+    }
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+  }
+  .bg-orb { animation: none !important; }
 }
