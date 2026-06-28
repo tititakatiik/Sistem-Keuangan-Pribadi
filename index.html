@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Keuangan Pribadi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ===== ABSTRACT DESERT BACKGROUND CANVAS ===== -->
+    <div class="bg-canvas" aria-hidden="true">
+      <div class="bg-orb bg-orb--cream"></div>
+      <div class="bg-orb bg-orb--orange"></div>
+      <div class="bg-orb bg-orb--sand"></div>
+      <div class="bg-orb bg-orb--glass"></div>
+      <div class="bg-orb bg-orb--stone"></div>
+    </div>
+
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <div class="app-shell">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar__brand">
+          <div class="brand-mark">Rp</div>
+          <div class="sidebar__brand-text">
+            <strong>Keuangan Pribadi</strong>
+            <span>Kelola dengan tenang</span>
+          </div>
+        </div>
+
+        <nav class="sidebar__nav">
+          <button class="nav-item is-active" data-view="dashboard">
+            <span class="nav-item__icon">⌂</span> Dashboard
+          </button>
+          <button class="nav-item" data-view="transactions">
+            <span class="nav-item__icon">≣</span> Transaksi
+          </button>
+          <button class="nav-item" data-view="categories">
+            <span class="nav-item__icon">⬡</span> Kategori
+          </button>
+        </nav>
+
+        <div class="sidebar__footer">
+          <button id="darkModeToggle" class="theme-switch">
+            <span id="themeIcon">🌙</span>
+            <span id="themeLabel">Mode Gelap</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- ===== MOBILE TOPBAR ===== -->
+      <header class="mobile-topbar">
+        <button id="sidebarToggle" class="icon-btn" aria-label="Buka menu">
+          ☰
+        </button>
+        <div class="mobile-topbar__title" id="mobileViewTitle">Dashboard</div>
+        <button
+          id="darkModeToggleMobile"
+          class="icon-btn"
+          aria-label="Toggle dark mode"
+        >
+          🌙
+        </button>
+      </header>
+      <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <main class="main-content">
+        <!-- ============ VIEW: DASHBOARD (semua kondisi finansial tampil langsung di sini) ============ -->
+        <section class="view" id="view-dashboard" data-view-section>
+          <div class="view-header">
+            <div>
+              <h1>Dashboard</h1>
+              <p class="view-header__subtitle">
+                Ringkasan kondisi keuanganmu saat ini — tanpa perlu scroll
+              </p>
+            </div>
+            <button id="addTransactionTopBtn" class="btn btn--primary">
+              + Transaksi Baru
+            </button>
+          </div>
+
+          <!-- Dashboard summary cards -->
+          <div class="stats-grid">
+            <div class="stat-card stat-card--income glass">
+              <span class="stat-card__label">Total Income</span>
+              <span class="stat-card__value" id="statIncome">Rp 0</span>
+              <span class="stat-card__icon">↑</span>
+            </div>
+            <div class="stat-card stat-card--expense glass">
+              <span class="stat-card__label">Total Expense</span>
+              <span class="stat-card__value" id="statExpense">Rp 0</span>
+              <span class="stat-card__icon">↓</span>
+            </div>
+            <div class="stat-card stat-card--balance glass">
+              <span class="stat-card__label">Saved Balance</span>
+              <span class="stat-card__value" id="statBalance">Rp 0</span>
+              <span class="stat-card__icon" id="statBalanceIcon">⚖</span>
+            </div>
+            <div class="stat-card stat-card--rate glass">
+              <span class="stat-card__label">Savings Rate</span>
+              <span class="stat-card__value" id="statSavingsRate">0%</span>
+              <span class="stat-card__icon">◷</span>
+            </div>
+          </div>
+
+          <!-- Filter toolbar — mempengaruhi SELURUH widget dashboard secara realtime -->
+          <div class="card toolbar-card glass">
+            <div class="toolbar">
+              <div class="field">
+                <label for="monthFilter">Bulan</label>
+                <select id="monthFilter">
+                  <option value="all">Semua Bulan</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="categoryFilter">Kategori</label>
+                <select id="categoryFilter">
+                  <option value="all">Semua Kategori</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="typeFilter">Jenis</label>
+                <select id="typeFilter">
+                  <option value="all">Semua Jenis</option>
+                  <option value="income">Pemasukan</option>
+                  <option value="expense">Pengeluaran</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="dateFromFilter">Dari Tanggal</label>
+                <input type="date" id="dateFromFilter" />
+              </div>
+              <div class="field">
+                <label for="dateToFilter">Sampai Tanggal</label>
+                <input type="date" id="dateToFilter" />
+              </div>
+              <button id="resetFilterBtn" class="btn btn--ghost">
+                Reset Filter
+              </button>
+              <button id="exportBtn" class="btn btn--ghost">
+                ⬇ Export JSON
+              </button>
+            </div>
+          </div>
+
+          <!-- ===== OVERVIEW: Financial Health + Cost Analysis (langsung di dashboard) ===== -->
+          <div class="overview-grid">
+            <!-- Financial Health gauge — update realtime dari data transaksi -->
+            <div class="card glass health-card-compact">
+              <h2 class="card__title">Financial Health</h2>
+              <div class="gauge-wrap">
+                <svg
+                  id="gaugeSvg"
+                  viewBox="0 0 240 140"
+                  class="gauge-svg"
+                ></svg>
+                <div class="gauge-readout">
+                  <span id="healthScoreValue">0</span>
+                  <span class="gauge-readout__label" id="healthScoreLabel"
+                    >Critical</span
+                  >
+                </div>
+              </div>
+              <div class="gauge-legend">
+                <span><i class="dot dot--red"></i>0–30</span>
+                <span><i class="dot dot--orange"></i>31–50</span>
+                <span><i class="dot dot--yellow"></i>51–70</span>
+                <span><i class="dot dot--lightgreen"></i>71–85</span>
+                <span><i class="dot dot--green"></i>86–100</span>
+              </div>
+              <div class="breakdown-mini">
+                <div class="breakdown-mini-row">
+                  <div class="breakdown-mini-row__head">
+                    <span>Savings Rate</span
+                    ><strong id="breakdownSavings">0</strong>
+                  </div>
+                  <div class="breakdown-mini-bar">
+                    <div
+                      class="breakdown-mini-bar__fill"
+                      id="breakdownSavingsBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="breakdown-mini-row">
+                  <div class="breakdown-mini-row__head">
+                    <span>Spending Control</span
+                    ><strong id="breakdownSpending">0</strong>
+                  </div>
+                  <div class="breakdown-mini-bar">
+                    <div
+                      class="breakdown-mini-bar__fill"
+                      id="breakdownSpendingBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="breakdown-mini-row">
+                  <div class="breakdown-mini-row__head">
+                    <span>Goal Progress</span
+                    ><strong id="breakdownGoals">0</strong>
+                  </div>
+                  <div class="breakdown-mini-bar">
+                    <div
+                      class="breakdown-mini-bar__fill"
+                      id="breakdownGoalsBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="breakdown-mini-row">
+                  <div class="breakdown-mini-row__head">
+                    <span>Expense Consistency</span
+                    ><strong id="breakdownConsistency">0</strong>
+                  </div>
+                  <div class="breakdown-mini-bar">
+                    <div
+                      class="breakdown-mini-bar__fill"
+                      id="breakdownConsistencyBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cost Analysis: Expense by Category (Pie Chart) -->
+            <div class="card glass analysis-pie-card">
+              <h2 class="card__title">Expense by Category</h2>
+              <div class="chart-wrap chart-wrap--pie">
+                <canvas id="pieChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Cost Analysis: Biggest Spending Category + Expense Ratio -->
+            <div class="card glass analysis-stat-card">
+              <h2 class="card__title">Biggest Spending Category</h2>
+              <div class="biggest-category" id="biggestCategoryBox">
+                <span class="biggest-category__name" id="biggestCategoryName"
+                  >—</span
+                >
+                <span
+                  class="biggest-category__amount"
+                  id="biggestCategoryAmount"
+                  >Rp 0</span
+                >
+              </div>
+              <h2 class="card__title" style="margin-top: 18px">
+                Expense Ratio
+              </h2>
+              <div class="expense-ratio" id="expenseRatioBox">
+                <span class="expense-ratio__value" id="expenseRatioValue"
+                  >0%</span
+                >
+                <span class="expense-ratio__tag" id="expenseRatioTag"
+                  >Healthy</span
+                >
+              </div>
+            </div>
+
+            <!-- Cost Analysis: Top Spending Categories -->
+            <div class="card glass analysis-categories-card">
+              <h2 class="card__title">Top Spending Categories</h2>
+              <div id="topCategoriesList" class="top-categories-list"></div>
+            </div>
+          </div>
+
+          <!-- ===== GOAL TRACKER: widget compact langsung di dashboard ===== -->
+          <div class="card glass goal-tracker-card">
+            <div class="dashboard-section-head">
+              <h2 class="card__title">Goal Tracker</h2>
+              <button id="addGoalBtn" class="btn btn--goal btn--sm">
+                + Goal Baru
+              </button>
+            </div>
+            <div id="goalsList" class="goals-grid goals-grid--compact"></div>
+            <div id="goalsEmptyState" class="empty-state" hidden>
+              <div class="empty-state__icon">◎</div>
+              <p class="empty-state__title">Belum ada goal</p>
+              <p class="empty-state__text">
+                Buat goal pertamamu, misalnya menabung untuk laptop atau
+                liburan.
+              </p>
+            </div>
+          </div>
+
+          <!-- ===== Grafik tambahan (pendukung, di bawah ringkasan utama) ===== -->
+          <h3 class="secondary-section-title">Grafik Tambahan</h3>
+          <div class="charts-grid charts-grid--triple">
+            <div class="card chart-card glass">
+              <h2 class="card__title">Pemasukan vs Pengeluaran</h2>
+              <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+            </div>
+            <div class="card chart-card glass">
+              <h2 class="card__title">Tren Saldo</h2>
+              <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+            </div>
+            <div class="card chart-card glass">
+              <h2 class="card__title">Tren Pengeluaran Bulanan</h2>
+              <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ VIEW: TRANSACTIONS ============ -->
+        <section class="view" id="view-transactions" data-view-section hidden>
+          <div class="view-header">
+            <div>
+              <h1>Transaksi</h1>
+              <p class="view-header__subtitle">
+                Semua riwayat pemasukan dan pengeluaran
+              </p>
+            </div>
+          </div>
+
+          <!-- Form tambah transaksi -->
+          <div class="card form-card glass">
+            <div class="type-tabs" role="tablist">
+              <button
+                type="button"
+                class="type-tab type-tab--income is-active"
+                data-type="income"
+                role="tab"
+              >
+                + Pemasukan
+              </button>
+              <button
+                type="button"
+                class="type-tab type-tab--expense"
+                data-type="expense"
+                role="tab"
+              >
+                + Pengeluaran
+              </button>
+            </div>
+
+            <form id="transactionForm" class="transaction-form">
+              <input type="hidden" id="formType" value="income" />
+              <div class="form-grid">
+                <div class="field">
+                  <label for="title">Nama Transaksi</label>
+                  <input
+                    type="text"
+                    id="title"
+                    placeholder="cth: Gaji Bulanan"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="amount">Nominal (Rp)</label>
+                  <input
+                    type="number"
+                    id="amount"
+                    placeholder="cth: 5000000"
+                    min="1"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="date">Tanggal</label>
+                  <input type="date" id="date" required />
+                </div>
+                <div class="field">
+                  <label for="category">Kategori</label>
+                  <select id="category" required></select>
+                </div>
+              </div>
+              <button type="submit" id="submitBtn" class="btn btn--income">
+                Tambah Pemasukan
+              </button>
+            </form>
+          </div>
+
+          <!-- Search & sort -->
+          <div class="card toolbar-card glass">
+            <div class="toolbar">
+              <div class="field field--grow">
+                <label for="searchInput">Cari Transaksi</label>
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Ketik nama transaksi atau kategori..."
+                />
+              </div>
+              <div class="field">
+                <label for="sortSelect">Urutkan</label>
+                <select id="sortSelect">
+                  <option value="newest">Terbaru</option>
+                  <option value="oldest">Terlama</option>
+                  <option value="highest">Nominal Terbesar</option>
+                  <option value="lowest">Nominal Terkecil</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card list-card glass">
+            <h2 class="card__title">Riwayat Transaksi</h2>
+            <div id="transactionList" class="transaction-list"></div>
+            <div id="emptyState" class="empty-state" hidden>
+              <div class="empty-state__icon">🗒️</div>
+              <p class="empty-state__title">Belum ada transaksi</p>
+              <p class="empty-state__text">
+                Mulai catat pemasukan atau pengeluaranmu lewat form di atas.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ VIEW: CATEGORIES ============ -->
+        <section class="view" id="view-categories" data-view-section hidden>
+          <div class="view-header">
+            <div>
+              <h1>Kategori</h1>
+              <p class="view-header__subtitle">
+                Kelola kategori pemasukan dan pengeluaran
+              </p>
+            </div>
+          </div>
+
+          <div class="categories-grid">
+            <div class="card glass">
+              <div class="category-section-head">
+                <h2 class="card__title">Kategori Pengeluaran</h2>
+                <button
+                  class="btn btn--expense btn--sm"
+                  data-add-category="expense"
+                >
+                  + Tambah
+                </button>
+              </div>
+              <div id="expenseCategoryList" class="category-chip-list"></div>
+            </div>
+
+            <div class="card glass">
+              <div class="category-section-head">
+                <h2 class="card__title">Kategori Pemasukan</h2>
+                <button
+                  class="btn btn--income btn--sm"
+                  data-add-category="income"
+                >
+                  + Tambah
+                </button>
+              </div>
+              <div id="incomeCategoryList" class="category-chip-list"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ===== MODAL: EDIT TRANSAKSI ===== -->
+    <div id="editModal" class="modal-overlay" hidden>
+      <div
+        class="modal glass"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="editModalTitle"
+      >
+        <div class="modal__header">
+          <h3 id="editModalTitle">Edit Transaksi</h3>
+          <button id="closeModalBtn" class="icon-btn" aria-label="Tutup">
+            ✕
+          </button>
+        </div>
+        <form id="editForm" class="transaction-form">
+          <input type="hidden" id="editId" />
+          <div class="form-grid">
+            <div class="field">
+              <label for="editTitle">Nama Transaksi</label>
+              <input type="text" id="editTitle" required />
+            </div>
+            <div class="field">
+              <label for="editAmount">Nominal (Rp)</label>
+              <input type="number" id="editAmount" min="1" required />
+            </div>
+            <div class="field">
+              <label for="editDate">Tanggal</label>
+              <input type="date" id="editDate" required />
+            </div>
+            <div class="field">
+              <label for="editCategory">Kategori</label>
+              <select id="editCategory" required></select>
+            </div>
+            <div class="field">
+              <label for="editType">Jenis</label>
+              <select id="editType">
+                <option value="income">Pemasukan</option>
+                <option value="expense">Pengeluaran</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal__actions">
+            <button type="button" id="cancelEditBtn" class="btn btn--ghost">
+              Batal
+            </button>
+            <button type="submit" class="btn btn--income">
+              Simpan Perubahan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== MODAL: HAPUS TRANSAKSI ===== -->
+    <div id="deleteModal" class="modal-overlay" hidden>
+      <div
+        class="modal modal--sm glass"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="deleteModalTitle"
+      >
+        <div class="modal__header">
+          <h3 id="deleteModalTitle">Hapus Transaksi?</h3>
+          <button id="closeDeleteModalBtn" class="icon-btn" aria-label="Tutup">
+            ✕
+          </button>
+        </div>
+        <p class="modal__text">
+          Transaksi <strong id="deleteTargetName"></strong> akan dihapus
+          permanen dan tidak bisa dikembalikan.
+        </p>
+        <div class="modal__actions">
+          <button type="button" id="cancelDeleteBtn" class="btn btn--ghost">
+            Batal
+          </button>
+          <button type="button" id="confirmDeleteBtn" class="btn btn--expense">
+            Ya, Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MODAL: TAMBAH / EDIT GOAL ===== -->
+    <div id="goalModal" class="modal-overlay" hidden>
+      <div
+        class="modal glass"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="goalModalTitle"
+      >
+        <div class="modal__header">
+          <h3 id="goalModalTitle">Goal Baru</h3>
+          <button id="closeGoalModalBtn" class="icon-btn" aria-label="Tutup">
+            ✕
+          </button>
+        </div>
+        <form id="goalForm" class="transaction-form">
+          <input type="hidden" id="goalId" />
+          <div class="form-grid form-grid--2col">
+            <div class="field field--full">
+              <label for="goalTitle">Nama Goal</label>
+              <input
+                type="text"
+                id="goalTitle"
+                placeholder="cth: Beli Laptop"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="goalTarget">Target (Rp)</label>
+              <input type="number" id="goalTarget" min="1" required />
+            </div>
+            <div class="field">
+              <label for="goalSaved">Sudah Terkumpul (Rp)</label>
+              <input type="number" id="goalSaved" min="0" required />
+            </div>
+            <div class="field field--full">
+              <label for="goalDeadline">Deadline</label>
+              <input type="date" id="goalDeadline" required />
+            </div>
+          </div>
+          <div class="modal__actions">
+            <button type="button" id="cancelGoalBtn" class="btn btn--ghost">
+              Batal
+            </button>
+            <button type="submit" class="btn btn--goal">Simpan Goal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== MODAL: HAPUS GOAL ===== -->
+    <div id="deleteGoalModal" class="modal-overlay" hidden>
+      <div
+        class="modal modal--sm glass"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="deleteGoalModalTitle"
+      >
+        <div class="modal__header">
+          <h3 id="deleteGoalModalTitle">Hapus Goal?</h3>
+          <button
+            id="closeDeleteGoalModalBtn"
+            class="icon-btn"
+            aria-label="Tutup"
+          >
+            ✕
+          </button>
+        </div>
+        <p class="modal__text">
+          Goal <strong id="deleteGoalTargetName"></strong> akan dihapus
+          permanen.
+        </p>
+        <div class="modal__actions">
+          <button type="button" id="cancelDeleteGoalBtn" class="btn btn--ghost">
+            Batal
+          </button>
+          <button
+            type="button"
+            id="confirmDeleteGoalBtn"
+            class="btn btn--expense"
+          >
+            Ya, Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MODAL: TAMBAH / EDIT KATEGORI ===== -->
+    <div id="categoryModal" class="modal-overlay" hidden>
+      <div
+        class="modal modal--sm glass"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="categoryModalTitle"
+      >
+        <div class="modal__header">
+          <h3 id="categoryModalTitle">Tambah Kategori</h3>
+          <button
+            id="closeCategoryModalBtn"
+            class="icon-btn"
+            aria-label="Tutup"
+          >
+            ✕
+          </button>
+        </div>
+        <form id="categoryForm" class="transaction-form">
+          <input type="hidden" id="categoryOldName" />
+          <input type="hidden" id="categoryType" />
+          <div class="field">
+            <label for="categoryName">Nama Kategori</label>
+            <input
+              type="text"
+              id="categoryName"
+              placeholder="cth: Hobi"
+              required
+            />
+          </div>
+          <div class="modal__actions">
+            <button type="button" id="cancelCategoryBtn" class="btn btn--ghost">
+              Batal
+            </button>
+            <button type="submit" class="btn btn--primary">
+              Simpan Kategori
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== MODAL: HAPUS KATEGORI ===== -->
+    <div id="deleteCategoryModal" class="modal-overlay" hidden>
+      <div
+        class="modal modal--sm glass"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="deleteCategoryModalTitle"
+      >
+        <div class="modal__header">
+          <h3 id="deleteCategoryModalTitle">Hapus Kategori?</h3>
+          <button
+            id="closeDeleteCategoryModalBtn"
+            class="icon-btn"
+            aria-label="Tutup"
+          >
+            ✕
+          </button>
+        </div>
+        <p class="modal__text">
+          Kategori <strong id="deleteCategoryTargetName"></strong> akan dihapus
+          dari daftar.
+        </p>
+        <div class="modal__actions">
+          <button
+            type="button"
+            id="cancelDeleteCategoryBtn"
+            class="btn btn--ghost"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            id="confirmDeleteCategoryBtn"
+            class="btn btn--expense"
+          >
+            Ya, Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
